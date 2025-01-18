@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ namespace SimpleAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly SQLiteContext _context;
@@ -70,7 +72,7 @@ namespace SimpleAPI.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(new { ApiKey = user.generateNewAPIKey() });
         }
 
         // POST: api/Users

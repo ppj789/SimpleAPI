@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ namespace SimpleAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TaskItemsController : ControllerBase
     {
         private readonly SQLiteContext _context;
@@ -25,14 +27,14 @@ namespace SimpleAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasks()
         {
-            return await _context.Tasks.ToListAsync();
+            return await _context.TaskItems.ToListAsync();
         }
 
         // GET: api/TaskItems/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskItem>> GetTaskItem(int id)
         {
-            var taskItem = await _context.Tasks.FindAsync(id);
+            var taskItem = await _context.TaskItems.FindAsync(id);
 
             if (taskItem == null)
             {
@@ -78,7 +80,7 @@ namespace SimpleAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<TaskItem>> PostTaskItem(TaskItem taskItem)
         {
-            _context.Tasks.Add(taskItem);
+            _context.TaskItems.Add(taskItem);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTaskItem", new { id = taskItem.Id }, taskItem);
@@ -88,13 +90,13 @@ namespace SimpleAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTaskItem(int id)
         {
-            var taskItem = await _context.Tasks.FindAsync(id);
+            var taskItem = await _context.TaskItems.FindAsync(id);
             if (taskItem == null)
             {
                 return NotFound();
             }
 
-            _context.Tasks.Remove(taskItem);
+            _context.TaskItems.Remove(taskItem);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -102,7 +104,31 @@ namespace SimpleAPI.Controllers
 
         private bool TaskItemExists(int id)
         {
-            return _context.Tasks.Any(e => e.Id == id);
+            return _context.TaskItems.Any(e => e.Id == id);
         }
+
+        [HttpGet("expired")]
+        public IActionResult GetExpiredTasks()
+        {
+            var tasks = _context.TaskItems.Where(t => t.DueDate < DateTime.Now);
+            return Ok(tasks);
+        }
+
+
+        [HttpGet("active")]
+        public IActionResult GetActiveTasks()
+        {
+            var tasks = _context.TaskItems.Where(t => t.DueDate >= DateTime.Now);
+            return Ok(tasks);
+        }
+
+        //Phrasing is a bit confusing. Either, looking for due date so equals, or still with due time period from certain date. Going with the later.
+        [HttpGet("fromDate")]
+        public IActionResult GetTasksFromDate(DateTime date)
+        {
+            var tasks = _context.TaskItems.Where(t => t.DueDate >= date);
+            return Ok(tasks);
+        }
+
     }
 }

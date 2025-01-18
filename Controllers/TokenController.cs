@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using SimpleAPI.Data;
 using SimpleAPI.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -13,6 +14,13 @@ namespace SimpleAPI.Controllers
     [AllowAnonymous]
     public class TokenController : ControllerBase
     {
+
+        private readonly SQLiteContext _context;
+
+        public TokenController(SQLiteContext context)
+        {
+            _context = context;
+        }
 
         [HttpPost("login")]
         public IActionResult CreateToken()
@@ -46,24 +54,12 @@ namespace SimpleAPI.Controllers
             return Ok();
         }
 
-
-
-
-        private JwtSecurityToken GenerateAccessToken(string userName)
+        [HttpPost("generateDB")]
+        public async Task<ActionResult?> GenerateDB()
         {
-
-            //// Create a JWT
-            //var token = new JwtSecurityToken(
-            //    issuer: _configuration["JwtSettings:Issuer"],
-            //    audience: _configuration["JwtSettings:Audience"],
-            //    claims: claims,
-            //    expires: DateTime.UtcNow.AddMinutes(1), // Token expiration time
-            //    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"])),
-            //        SecurityAlgorithms.HmacSha256)
-            //);
-
-            //return token;
-            return null;
+            //_context.
+            return Ok();
         }
+
     }
 }

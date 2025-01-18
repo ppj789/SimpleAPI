@@ -9,6 +9,6 @@ namespace SimpleAPI.Data
         public SQLiteContext(DbContextOptions<SQLiteContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<TaskItem> Tasks { get; set; }
+        public DbSet<TaskItem> TaskItems { get; set; }
     }
 }

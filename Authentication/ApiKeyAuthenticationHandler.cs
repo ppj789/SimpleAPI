@@ -38,5 +38,10 @@ namespace SimpleAPI.Authentication
 
             return AuthenticateResult.Success(ticket);
         }
+
+        public static string GenerateApiKey()
+        {
+            return Guid.NewGuid().ToString("N");
+        }
     }
 }
