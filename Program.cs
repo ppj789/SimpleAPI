@@ -2,12 +2,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
-using SimpleAPI.Authentication;
 using SimpleAPI.Data;
 using SimpleAPI.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using SimpleAPI.Services;
+using SimpleAPI.Models;
+using SimpleAPI.Services.Repository;
+using SimpleAPI.Authentication;
+using Microsoft.OpenApi.Models;
+using SimpleAPI.Authentication.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -16,12 +21,47 @@ var configuration = builder.Configuration;
 builder.Services.AddDbContext<SQLiteContext>(options =>
         options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<ITaskItemRepository, TaskItemRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<TaskItemService>();
+
+builder.Services.AddScoped<CacheService>();
+builder.Services.AddTransient<ApiKeyAuthenticationHandler>();
+
+
 builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthentication()
+    .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationOptions.DefaultScheme, null);
+
+builder.Services.AddSwaggerGen(setup =>
+{
+    setup.AddSecurityDefinition(ApiKeyAuthenticationOptions.DefaultScheme, new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Name = ApiKeyAuthenticationOptions.HeaderName,
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = ApiKeyAuthenticationOptions.DefaultScheme
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 
 
@@ -42,8 +82,6 @@ app.UseHttpsRedirection();
 
 
 
-
-app.UseAuthorization();
 
 app.MapControllers();
 

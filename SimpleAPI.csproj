@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Authentication\" />
+    <Folder Include="Middleware\" />
   </ItemGroup>
 
 </Project>

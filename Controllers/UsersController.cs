@@ -4,37 +4,40 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SimpleAPI.Data;
 using SimpleAPI.Models;
+using SimpleAPI.Services;
 
 namespace SimpleAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class UsersController : ControllerBase
     {
-        private readonly SQLiteContext _context;
+        private readonly UserService _userService;
 
-        public UsersController(SQLiteContext context)
+        // Constructor injection for UserService
+        public UsersController(UserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<IEnumerable<User>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await _userService.GetUsersAsync();
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userService.GetUserAsync(id);
 
             if (user == null)
             {
@@ -54,25 +57,11 @@ namespace SimpleAPI.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
+            await _userService.UpdateUserAsync(id, user);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+       
 
-            return Ok(new { ApiKey = user.generateNewAPIKey() });
+            return NoContent();
         }
 
         // POST: api/Users
@@ -80,31 +69,33 @@ namespace SimpleAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return await _userService.CreateUserAsync(user);
         }
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            await _userService.DeleteUserAsync(id);
+            
 
             return NoContent();
         }
 
-        private bool UserExists(int id)
+        // GET: api/Users/newApiKey/5
+        [HttpGet("newApiKey/{id}")]
+        public async Task<ActionResult<User>> GenerateNewApiKey(int id)
         {
-            return _context.Users.Any(e => e.Id == id);
+            var apiKey = await _userService.GenerateApiKeyAsync(id);
+
+            if (apiKey == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(apiKey);
         }
+
     }
 }

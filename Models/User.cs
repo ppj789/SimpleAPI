@@ -1,5 +1,4 @@
-﻿using SimpleAPI.Authentication;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SimpleAPI.Models
 {
@@ -11,12 +10,7 @@ namespace SimpleAPI.Models
         public required string Email { get; set; }
         public required string Password { get; set; }
         //Had to add APIKey even though it wasnt specificed, since it was needed for the Authentication
-        public string? ApiKey { get; set; }
+        public string ApiKey { get; set; }
 
-        public string generateNewAPIKey()
-        {
-            return ApiKey = ApiKeyAuthenticationHandler.GenerateApiKey();
-           
-        }
     }
 }

@@ -13,28 +13,28 @@ namespace SimpleAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class TaskItemsController : ControllerBase
     {
-        private readonly SQLiteContext _context;
+        private readonly TaskItemService _taskItemService;
 
-        public TaskItemsController(SQLiteContext context)
+        public TaskItemsController(TaskItemService taskItemService)
         {
-            _context = context;
+            _taskItemService = taskItemService;
         }
 
         // GET: api/TaskItems
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasks()
+        public async Task<IEnumerable<TaskItem>> GetTasks()
         {
-            return await _context.TaskItems.ToListAsync();
+            return await _taskItemService.GetTaskItemsAsync();
         }
 
         // GET: api/TaskItems/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskItem>> GetTaskItem(int id)
         {
-            var taskItem = await _context.TaskItems.FindAsync(id);
+            var taskItem = await _taskItemService.GetTaskItemAsync(id);
 
             if (taskItem == null)
             {
@@ -54,23 +54,8 @@ namespace SimpleAPI.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(taskItem).State = EntityState.Modified;
+            await _taskItemService.UpdateTaskItemAsync(id, taskItem);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TaskItemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
 
             return NoContent();
         }
@@ -79,54 +64,47 @@ namespace SimpleAPI.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<TaskItem>> PostTaskItem(TaskItem taskItem)
-        {
-            _context.TaskItems.Add(taskItem);
-            await _context.SaveChangesAsync();
+        { 
 
-            return CreatedAtAction("GetTaskItem", new { id = taskItem.Id }, taskItem);
+            return await _taskItemService.CreateTaskItemAsync(taskItem);
         }
 
         // DELETE: api/TaskItems/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTaskItem(int id)
         {
-            var taskItem = await _context.TaskItems.FindAsync(id);
+            var taskItem = await _taskItemService.GetTaskItemAsync(id);
             if (taskItem == null)
             {
                 return NotFound();
             }
 
-            _context.TaskItems.Remove(taskItem);
-            await _context.SaveChangesAsync();
+            await _taskItemService.DeleteTaskItemAsync(id);
 
             return NoContent();
         }
 
-        private bool TaskItemExists(int id)
-        {
-            return _context.TaskItems.Any(e => e.Id == id);
-        }
 
         [HttpGet("expired")]
-        public IActionResult GetExpiredTasks()
+        public async Task<IActionResult> GetExpiredTasks()
         {
-            var tasks = _context.TaskItems.Where(t => t.DueDate < DateTime.Now);
+            var tasks = await _taskItemService.GetExpiredTasksAsync();
             return Ok(tasks);
         }
 
 
         [HttpGet("active")]
-        public IActionResult GetActiveTasks()
+        public async Task<IActionResult> GetActiveTasks()
         {
-            var tasks = _context.TaskItems.Where(t => t.DueDate >= DateTime.Now);
+            var tasks = await _taskItemService.GetActiveTasksAsync();
             return Ok(tasks);
         }
 
         //Phrasing is a bit confusing. Either, looking for due date so equals, or still with due time period from certain date. Going with the later.
         [HttpGet("fromDate")]
-        public IActionResult GetTasksFromDate(DateTime date)
+        public async Task<IActionResult> GetTasksFromDate(DateTime date)
         {
-            var tasks = _context.TaskItems.Where(t => t.DueDate >= date);
+            var tasks = await _taskItemService.GetTasksFromDateAsync(date);
             return Ok(tasks);
         }
 
