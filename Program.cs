@@ -26,7 +26,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<TaskItemService>();
 
+
+
+builder.Services.AddMemoryCache();
+
 builder.Services.AddScoped<CacheService>();
+
 builder.Services.AddTransient<ApiKeyAuthenticationHandler>();
 
 

@@ -1,8 +1,8 @@
 ﻿TODO:
 
 1, just stick to API key (misread the question)
-2, implement a controller -> service -> repository services 
-3. add testing
+https://www.camiloterevinto.com/post/simple-and-secure-api-keys-using-asp-net-core
+2. add testing
 
 
 

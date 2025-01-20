@@ -13,7 +13,7 @@ namespace SimpleAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class TaskItemsController : ControllerBase
     {
         private readonly TaskItemService _taskItemService;
