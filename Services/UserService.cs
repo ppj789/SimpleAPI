@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using SimpleAPI.Data;
 using SimpleAPI.Models;
+using SimpleAPI.Models.UserDTO;
 using SimpleAPI.Services.Repository;
 
 namespace SimpleAPI.Services
@@ -8,6 +10,12 @@ namespace SimpleAPI.Services
     public class UserService
     {
         private readonly IUserRepository _userRepository;
+        Mapper mapper = new Mapper(new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<User, UserResponse>();
+            cfg.CreateMap<User, CreateUserResponse>();
+        }));
+
 
         public UserService()
         {
@@ -22,25 +30,43 @@ namespace SimpleAPI.Services
 
 
 
-        public async Task<IEnumerable<User>> GetUsersAsync()
+        public async Task<IEnumerable<UserResponse>> GetUsersAsync()
+        {
+            return mapper.Map<IEnumerable<UserResponse>>(await _userRepository.GetUsersAsync());
+        }
+
+        public async Task<IEnumerable<User>> GetUsersWithAPIKeysAsync()
         {
             return await _userRepository.GetUsersAsync();
         }
 
 
-        public async Task<User> GetUserAsync(int id)
+        public async Task<UserResponse> GetUserAsync(int id)
         {
-            var user = await _userRepository.GetUserByIDAsync(id);
+            User user = await _userRepository.GetUserByIDAsync(id);
 
-            return user;
+            return mapper.Map<UserResponse>(user);
         }
 
 
-        public async Task<User> UpdateUserAsync(int id, User user)
+        public async Task<UserResponse> UpdateUserAsync(int id, UpdateUserRequest updateUser)
         {
-            if (id != user.Id)
+            User user = await _userRepository.GetUserByIDAsync(id);
+
+
+            if (!string.IsNullOrEmpty(updateUser.Username))
             {
-                throw new ArgumentException("User ID does not match.");
+                user.Username = updateUser.Username;
+            }
+
+            if (!string.IsNullOrEmpty(updateUser.Email))
+            {
+                user.Email = updateUser.Email;
+            }
+
+            if (!string.IsNullOrEmpty(updateUser.Password))
+            {
+                user.Password = updateUser.Password;
             }
 
             await _userRepository.UpdateUserAsync(user);
@@ -61,16 +87,36 @@ namespace SimpleAPI.Services
                 }
             }
 
-            return user;
+            return mapper.Map<UserResponse>(user);
+        }
+
+        public async Task<UserResponse> UpdateUserAsync(User user)
+        {
+
+            await _userRepository.UpdateUserAsync(user);
+            await _userRepository.SaveAsync();
+
+            return mapper.Map<UserResponse>(user);
         }
 
 
-        public async Task<User> CreateUserAsync(User user)
+        public async Task<CreateUserResponse> CreateUserAsync(CreateUserRequest createUser)
         {
+
+            User user = new User
+            {
+                ApiKey = GenerateApiKey(),
+                Email = createUser.Email,
+                Username = createUser.Username,
+                Password = createUser.Password
+            };
+
             await _userRepository.InsertUserAsync(user);
             await _userRepository.SaveAsync();
 
-            return user;
+            CreateUserResponse createUserResponse = mapper.Map<CreateUserResponse>(user);
+
+            return createUserResponse;
         }
 
         public async Task DeleteUserAsync(int id)
@@ -97,20 +143,21 @@ namespace SimpleAPI.Services
             return Guid.NewGuid().ToString(); // Simple API key using GUID
         }
 
+
         public async Task<string> GenerateApiKeyAsync(int id)
         {
             var apiKey = GenerateApiKey();
 
             User user = await _userRepository.GetUserByIDAsync(id);
 
-            if (user == null) 
+            if (user == null)
                 throw new KeyNotFoundException("User not found.");
 
             user.ApiKey = apiKey;
 
 
-            await UpdateUserAsync(id, user);
-            
+            await UpdateUserAsync(user);
+
 
             return apiKey;
         }

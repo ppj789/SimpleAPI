@@ -1,8 +1,4 @@
-﻿using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using SimpleAPI.Models;
-using System;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace SimpleAPI.Data
 {

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SimpleAPI.Data;
 using SimpleAPI.Models;
+using SimpleAPI.Models.TaskDTO;
 
 namespace SimpleAPI.Controllers
 {
@@ -25,14 +19,14 @@ namespace SimpleAPI.Controllers
 
         // GET: api/TaskItems
         [HttpGet]
-        public async Task<IEnumerable<TaskItem>> GetTasks()
+        public async Task<IEnumerable<TaskItemResponse>> GetTasks()
         {
             return await _taskItemService.GetTaskItemsAsync();
         }
 
         // GET: api/TaskItems/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TaskItem>> GetTaskItem(int id)
+        public async Task<ActionResult<TaskItemResponse>> GetTaskItem(int id)
         {
             var taskItem = await _taskItemService.GetTaskItemAsync(id);
 
@@ -47,39 +41,33 @@ namespace SimpleAPI.Controllers
         // PUT: api/TaskItems/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTaskItem(int id, TaskItem taskItem)
+        public async Task<ActionResult<TaskItemResponse>> PutTaskItem(int id, UpdateTaskItemRequest updateTaskItem)
         {
-            if (id != taskItem.Id)
-            {
-                return BadRequest();
-            }
 
-            await _taskItemService.UpdateTaskItemAsync(id, taskItem);
-
-
-            return NoContent();
+            return await _taskItemService.UpdateTaskItemAsync(id, updateTaskItem);
         }
 
         // POST: api/TaskItems
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<TaskItem>> PostTaskItem(TaskItem taskItem)
-        { 
+        public async Task<ActionResult<TaskItemResponse>> PostTaskItem(CreateTaskItemRequest createTaskItem)
+        {
 
-            return await _taskItemService.CreateTaskItemAsync(taskItem);
+            return await _taskItemService.CreateTaskItemAsync(createTaskItem);
         }
 
         // DELETE: api/TaskItems/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTaskItem(int id)
         {
-            var taskItem = await _taskItemService.GetTaskItemAsync(id);
-            if (taskItem == null)
+            try
+            {
+                await _taskItemService.DeleteTaskItemAsync(id);
+            }
+            catch (KeyNotFoundException)
             {
                 return NotFound();
             }
-
-            await _taskItemService.DeleteTaskItemAsync(id);
 
             return NoContent();
         }

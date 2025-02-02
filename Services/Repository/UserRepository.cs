@@ -18,7 +18,7 @@ namespace SimpleAPI.Services.Repository
         public async Task DeleteUserAsync(int userId)
         {
             User user = await GetUserByIDAsync(userId);
-            _context.Users.Remove(user );
+            _context.Users.Remove(user);
         }
 
         public async Task<User> GetUserByIDAsync(int userId)

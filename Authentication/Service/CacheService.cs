@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using SimpleAPI.Services;
-using System.Linq;
 
 namespace SimpleAPI.Authentication.Service
 {
@@ -19,8 +18,8 @@ namespace SimpleAPI.Authentication.Service
         {
             if (!_memoryCache.TryGetValue<Dictionary<string, int>>($"Authentication_ApiKeys", out var internalKeys))
             {
-                var users = await _userService.GetUsersAsync();
-                if(users == null)
+                var users = await _userService.GetUsersWithAPIKeysAsync();
+                if (users == null)
                 {
                     return -1;
                 }

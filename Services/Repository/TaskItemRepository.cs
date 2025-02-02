@@ -23,12 +23,12 @@ namespace SimpleAPI.Services.Repository
 
         public async Task<TaskItem> GetTaskItemByIDAsync(int taskitemId)
         {
-            return await _context.TaskItems.FindAsync(taskitemId);
+            return await _context.TaskItems.Include(t => t.Assignee).FirstOrDefaultAsync(t => t.Id == taskitemId);
         }
 
         public async Task<IEnumerable<TaskItem>> GetTaskItemsAsync()
         {
-            return await _context.TaskItems.ToListAsync();
+            return await _context.TaskItems.Include(t => t.Assignee).ToListAsync();
         }
 
         public async Task InsertTaskItemAsync(TaskItem taskitem)

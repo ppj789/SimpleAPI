@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SimpleAPI.Data;
-using SimpleAPI.Models;
+using SimpleAPI.Models.UserDTO;
 using SimpleAPI.Services;
 
 namespace SimpleAPI.Controllers
@@ -28,14 +20,14 @@ namespace SimpleAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<IEnumerable<User>> GetUsers()
+        public async Task<IEnumerable<UserResponse>> GetUsers()
         {
             return await _userService.GetUsersAsync();
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserResponse>> GetUser(int id)
         {
             var user = await _userService.GetUserAsync(id);
 
@@ -50,27 +42,23 @@ namespace SimpleAPI.Controllers
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        public async Task<ActionResult<UserResponse>> PutUser(int id, UpdateUserRequest updateUser)
         {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
 
-            await _userService.UpdateUserAsync(id, user);
+            await _userService.UpdateUserAsync(id, updateUser);
 
-       
 
-            return NoContent();
+
+            return await _userService.UpdateUserAsync(id, updateUser); ;
         }
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<UserResponse>> PostUser(CreateUserRequest createUser)
         {
 
-            return await _userService.CreateUserAsync(user);
+            return await _userService.CreateUserAsync(createUser);
         }
 
         // DELETE: api/Users/5
@@ -78,23 +66,29 @@ namespace SimpleAPI.Controllers
         public async Task<IActionResult> DeleteUser(int id)
         {
             await _userService.DeleteUserAsync(id);
-            
+
 
             return NoContent();
         }
 
         // GET: api/Users/newApiKey/5
         [HttpGet("newApiKey/{id}")]
-        public async Task<ActionResult<User>> GenerateNewApiKey(int id)
+        public async Task<ActionResult<String>> GenerateNewApiKey(int id)
         {
-            var apiKey = await _userService.GenerateApiKeyAsync(id);
 
-            if (apiKey == null)
+            try
+            {
+                string apiKey = await _userService.GenerateApiKeyAsync(id);
+                return Ok(apiKey);
+            }
+            catch (KeyNotFoundException)
             {
                 return NotFound();
             }
 
-            return Ok(apiKey);
+
+
+
         }
 
     }

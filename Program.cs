@@ -1,18 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
-using SimpleAPI.Data;
-using SimpleAPI.Controllers;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using SimpleAPI.Services;
-using SimpleAPI.Models;
-using SimpleAPI.Services.Repository;
-using SimpleAPI.Authentication;
 using Microsoft.OpenApi.Models;
+using SimpleAPI.Authentication;
 using SimpleAPI.Authentication.Service;
+using SimpleAPI.Data;
+using SimpleAPI.Models;
+using SimpleAPI.Services;
+using SimpleAPI.Services.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
