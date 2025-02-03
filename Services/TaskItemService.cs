@@ -47,7 +47,7 @@ namespace SimpleAPI.Models
         {
             var taskItem = await _taskItemRepository.GetTaskItemByIDAsync(id);
 
-            return mapper.Map < TaskItemResponse > (taskItem);
+            return mapper.Map<TaskItemResponse>(taskItem);
         }
 
 
@@ -84,7 +84,7 @@ namespace SimpleAPI.Models
 
                 if (assignee != null)
                 {
-                    taskItem.Assignee = assignee; 
+                    taskItem.Assignee = assignee;
                 }
                 else
                 {
@@ -119,7 +119,7 @@ namespace SimpleAPI.Models
                 }
             }
 
-            return mapper.Map < TaskItemResponse > (taskItem);
+            return mapper.Map<TaskItemResponse>(taskItem);
         }
 
 
@@ -136,7 +136,7 @@ namespace SimpleAPI.Models
             await _taskItemRepository.InsertTaskItemAsync(taskItem);
             await _taskItemRepository.SaveAsync();
 
-            return mapper.Map < TaskItemResponse > (taskItem);
+            return mapper.Map<TaskItemResponse>(taskItem);
         }
 
         public async Task DeleteTaskItemAsync(int id)
@@ -162,19 +162,19 @@ namespace SimpleAPI.Models
         public async Task<IEnumerable<TaskItemResponse>> GetExpiredTasksAsync()
         {
             var taskItems = await _taskItemRepository.GetTaskItemsAsync();
-            return mapper.Map <IEnumerable<TaskItemResponse>> (taskItems.Where(t => t.DueDate < DateTime.Now).ToList());
+            return mapper.Map<IEnumerable<TaskItemResponse>>(taskItems.Where(t => t.DueDate < DateTime.Now).ToList());
         }
 
         public async Task<IEnumerable<TaskItemResponse>> GetActiveTasksAsync()
         {
             var taskItems = await _taskItemRepository.GetTaskItemsAsync();
-            return mapper.Map <IEnumerable<TaskItemResponse>> (taskItems.Where(t => t.DueDate >= DateTime.Now).ToList());
+            return mapper.Map<IEnumerable<TaskItemResponse>>(taskItems.Where(t => t.DueDate >= DateTime.Now).ToList());
         }
 
         public async Task<IEnumerable<TaskItemResponse>> GetTasksFromDateAsync(DateTime date)
         {
             var taskItems = await _taskItemRepository.GetTaskItemsAsync();
-            return mapper.Map <IEnumerable<TaskItemResponse>> (taskItems.Where(t => t.DueDate >= date).ToList());
+            return mapper.Map<IEnumerable<TaskItemResponse>>(taskItems.Where(t => t.DueDate >= date).ToList());
         }
 
 

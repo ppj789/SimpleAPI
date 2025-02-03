@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using SimpleAPI.Data;
 using SimpleAPI.Models;
 using SimpleAPI.Models.UserDTO;
@@ -10,7 +9,7 @@ namespace SimpleAPI.Services
     public class UserService
     {
         private readonly IUserRepository _userRepository;
-        Mapper mapper = new Mapper(new MapperConfiguration(cfg =>
+        readonly Mapper mapper = new Mapper(new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<User, UserResponse>();
             cfg.CreateMap<User, CreateUserResponse>();
@@ -43,7 +42,11 @@ namespace SimpleAPI.Services
 
         public async Task<UserResponse> GetUserAsync(int id)
         {
-            User user = await _userRepository.GetUserByIDAsync(id);
+            User? user = await _userRepository.GetUserByIDAsync(id);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found.");
+            }
 
             return mapper.Map<UserResponse>(user);
         }
@@ -51,7 +54,11 @@ namespace SimpleAPI.Services
 
         public async Task<UserResponse> UpdateUserAsync(int id, UpdateUserRequest updateUser)
         {
-            User user = await _userRepository.GetUserByIDAsync(id);
+            User? user = await _userRepository.GetUserByIDAsync(id);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found.");
+            }
 
 
             if (!string.IsNullOrEmpty(updateUser.Username))
@@ -70,40 +77,26 @@ namespace SimpleAPI.Services
             }
 
             await _userRepository.UpdateUserAsync(user);
+            await _userRepository.SaveAsync();
 
-            try
-            {
-                await _userRepository.SaveAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    throw new KeyNotFoundException("User not found.");
-                }
-                else
-                {
-                    throw;
-                }
-            }
 
             return mapper.Map<UserResponse>(user);
         }
 
-        public async Task<UserResponse> UpdateUserAsync(User user)
+        public async Task<User> UpdateUserAsync(User user)
         {
 
             await _userRepository.UpdateUserAsync(user);
             await _userRepository.SaveAsync();
 
-            return mapper.Map<UserResponse>(user);
+            return user;
         }
 
 
         public async Task<CreateUserResponse> CreateUserAsync(CreateUserRequest createUser)
         {
 
-            User user = new User
+            User user = new()
             {
                 ApiKey = GenerateApiKey(),
                 Email = createUser.Email,
@@ -121,20 +114,10 @@ namespace SimpleAPI.Services
 
         public async Task DeleteUserAsync(int id)
         {
-            var user = _userRepository.GetUserByIDAsync(id);
-            if (user == null)
-            {
-                throw new KeyNotFoundException("User not found.");
-            }
 
             await _userRepository.DeleteUserAsync(id);
             await _userRepository.SaveAsync();
 
-        }
-
-        private bool UserExists(int id)
-        {
-            return _userRepository.GetUserByIDAsync(id) != null;
         }
 
 
@@ -146,20 +129,21 @@ namespace SimpleAPI.Services
 
         public async Task<string> GenerateApiKeyAsync(int id)
         {
-            var apiKey = GenerateApiKey();
-
-            User user = await _userRepository.GetUserByIDAsync(id);
+            
+            User? user = await _userRepository.GetUserByIDAsync(id);
 
             if (user == null)
                 throw new KeyNotFoundException("User not found.");
 
+            var apiKey = GenerateApiKey();
+
             user.ApiKey = apiKey;
 
 
-            await UpdateUserAsync(user);
+            user = await UpdateUserAsync(user);
 
 
-            return apiKey;
+            return user.ApiKey;
         }
 
 

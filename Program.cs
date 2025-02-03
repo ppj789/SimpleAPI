@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using SimpleAPI.Authentication;
 using SimpleAPI.Authentication.Service;
 using SimpleAPI.Data;
+using SimpleAPI.Middleware;
 using SimpleAPI.Models;
 using SimpleAPI.Services;
 using SimpleAPI.Services.Repository;
@@ -77,9 +78,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
-
-
+app.UseMiddleware<ErrorHandlerMiddleware>();
 
 app.MapControllers();
 

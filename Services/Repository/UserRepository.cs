@@ -17,11 +17,15 @@ namespace SimpleAPI.Services.Repository
 
         public async Task DeleteUserAsync(int userId)
         {
-            User user = await GetUserByIDAsync(userId);
+            User? user = await GetUserByIDAsync(userId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found.");
+            }
             _context.Users.Remove(user);
         }
 
-        public async Task<User> GetUserByIDAsync(int userId)
+        public async Task<User?> GetUserByIDAsync(int userId)
         {
             return await _context.Users.FindAsync(userId);
         }
