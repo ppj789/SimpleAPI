@@ -22,6 +22,7 @@ SimpleAPI is a lightweight web API built using **ASP.NET Core** with **Entity Fr
 ---
 
 ## API Endpoints
+To start please use 'admin' for the API Key
 
 ### Users
 | Method | Endpoint         | Description              |
