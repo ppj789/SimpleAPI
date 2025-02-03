@@ -1,54 +1,110 @@
-﻿TODO:
+# SimpleAPI
+LLM was used in creation of this README
 
-1. just stick to API key (misread the question)
-https://www.camiloterevinto.com/post/simple-and-secure-api-keys-using-asp-net-core
+## Overview
+SimpleAPI is a lightweight web API built using **ASP.NET Core** with **Entity Framework (EF) Core** and **SQLite** for data persistence. It provides functionality for managing users and task items, with full CRUD operations and authentication via API keys.
 
-2. add testing
+## Features
+- **User Management**: Create, retrieve, update, and delete users.
+- **Task Management**: CRUD operations on task items with support for assignees and due dates.
+- **Authentication**: Uses API keys for authorization.
+- **Middleware for Error Handling**: Custom error handling for better API responses.
+- **AutoMapper Integration**: Converts models to DTOs for clean API responses.
+- **Unit Testing**: Comprehensive tests using **xUnit** and **Moq**.
+
+## Technologies Used
+- **ASP.NET Core**
+- **Entity Framework Core** (with SQLite)
+- **AutoMapper**
+- **xUnit & Moq** (for unit testing)
+- **Swagger** (for API documentation)
+
+---
+
+## API Endpoints
+
+### Users
+| Method | Endpoint         | Description              |
+|--------|-----------------|--------------------------|
+| GET    | `/api/users`     | Get all users           |
+| GET    | `/api/users/{id}` | Get user by ID         |
+| POST   | `/api/users`     | Create a new user      |
+| PUT    | `/api/users/{id}` | Update an existing user |
+| DELETE | `/api/users/{id}` | Delete a user          |
+| GET | `/api/users/newApiKey/{id}` | Generates a new api key for the user          |
+
+### Task Items
+| Method | Endpoint           | Description               |
+|--------|-------------------|---------------------------|
+| GET    | `/api/tasks`       | Get all tasks            |
+| GET    | `/api/tasks/{id}`   | Get task by ID          |
+| POST   | `/api/tasks`       | Create a new task       |
+| PUT    | `/api/tasks/{id}`   | Update an existing task |
+| DELETE | `/api/tasks/{id}`   | Delete a task           |
+| GET    | `/api/taskitems/expired`   | Get expired tasks           |
+| GET    | `/api/taskitems/active`   | Get active tasks           |
+| GET    | `/api/taskitems/fromDate/{date}`   | Get tasks from a specific date           |
+
+### Authentication
+Following the guide  https://www.camiloterevinto.com/post/simple-and-secure-api-keys-using-asp-net-core
+
+All requests must include an API key as a header:
+```sh
+Authorization: Bearer {your-api-key}
+```
+
+---
+
+### Models
+**User Model**:
+```sh
+Id
+Username
+Email
+Password
+API Key
+```
+
+**TaskItem Model**:
+```sh
+Id
+Title
+Description
+DueDate
+Assignee
+```
+
+---
+
+## Error Handling
+Custom middleware handles errors globally, returning 404 JSON responses:
+```json
+{
+  "message": "Task Item not found."
+}
+```
+
+---
+
+## Running Tests
+Unit tests are written using **xUnit** and **Moq**.
+
+
+# Further Improvements
+## Password
+hash the password, and store that
+
+## API Key
+Add a login, to verify API key
+Expire/Rotate key
+
+## Add roles
+Add roles, such as admin can see all, but a user can only see tasks and information about themselves or under them in the hierarchy. 
+
+## Pagenation and filtering
+If you have 1000 ItemTasks returned, make it only return a 100 at a time with pages or filtering.
 
 
 
-Assignment
-**Part 1: API Development**
 
-1. Create a new ASP.NET Core Web API project.
-2. Define the following models:
-- User: ID, Username, Email, Password
-- Task: ID, Title, Description, Assignee (UserID), DueDate
-3. Implement controllers and endpoints for CRUD operations for both users and tasks.
 
-**Part 2: Authentication**
-
-1. Implement authentication for the API using either API key or bearer token.
-2. For API key authentication:
-- Generate a unique API key for each user.
-- Require API key for accessing API endpoints.
-3. For bearer token authentication:
-- Implement JWT (JSON Web Tokens) authentication.
-- Generate and validate JWT tokens for users.
-- 
-**Part 3: Database Interaction**
-
-1. Choose either Entity Framework Core or Dapper for database interaction.
-2. Set up a local database (SQL Server, SQLite, etc.) for storing users and tasks information.
-3. Implement repository patterns to interact with the database for CRUD operations.
-
-**Part 4: Filtering**
-
-1. On the Tasks, filtering on due dates should be possible:
-a. Get all expired tasks.
-b. Get all active tasks.
-c. Get all tasks from a certain date.
-
-**Part 5: Testing**
-
-1. Write unit tests for the API controllers and repository methods.
-2. Use an appropriate testing framework (e.g., MSTest, NUnit, xUnit) for writing tests.
-**Part 6: Swagger Documentation**
-1. Integrate Swagger to generate API documentation.
-2. Ensure that all API endpoints are documented and properly described.
-
-**Part 7: Submission**
-
-Provide a GitHub link (public repository) of the completed test.
-
-Zip files and google drive links will not be accepted.
