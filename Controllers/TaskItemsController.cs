@@ -30,10 +30,7 @@ namespace SimpleAPI.Controllers
         {
             var taskItem = await _taskItemService.GetTaskItemAsync(id);
 
-            if (taskItem == null)
-            {
-                return NotFound();
-            }
+          
 
             return taskItem;
         }
@@ -60,14 +57,7 @@ namespace SimpleAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTaskItem(int id)
         {
-            try
-            {
-                await _taskItemService.DeleteTaskItemAsync(id);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
+            await _taskItemService.DeleteTaskItemAsync(id);
 
             return NoContent();
         }

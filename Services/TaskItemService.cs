@@ -46,6 +46,10 @@ namespace SimpleAPI.Models
         public async Task<TaskItemResponse> GetTaskItemAsync(int id)
         {
             var taskItem = await _taskItemRepository.GetTaskItemByIDAsync(id);
+            if(taskItem == null)
+            {
+                throw new KeyNotFoundException("Task Item not found");
+            }
 
             return mapper.Map<TaskItemResponse>(taskItem);
         }
@@ -80,7 +84,7 @@ namespace SimpleAPI.Models
             }
             else if (updateTaskItem.AssigneeId != null)
             {
-                User assignee = await _userRepository.GetUserByIDAsync(updateTaskItem.AssigneeId.Value);
+                User? assignee = await _userRepository.GetUserByIDAsync(updateTaskItem.AssigneeId.Value);
 
                 if (assignee != null)
                 {
@@ -103,21 +107,7 @@ namespace SimpleAPI.Models
 
             await _taskItemRepository.UpdateTaskItemAsync(taskItem);
 
-            try
-            {
-                await _taskItemRepository.SaveAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TaskItemExists(id))
-                {
-                    throw new KeyNotFoundException("Task Item not found.");
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _taskItemRepository.SaveAsync();
 
             return mapper.Map<TaskItemResponse>(taskItem);
         }
@@ -141,21 +131,11 @@ namespace SimpleAPI.Models
 
         public async Task DeleteTaskItemAsync(int id)
         {
-            var taskItem = await _taskItemRepository.GetTaskItemByIDAsync(id);
-            if (taskItem == null)
-            {
-                throw new KeyNotFoundException("Task Item not found.");
-            }
 
             await _taskItemRepository.DeleteTaskItemAsync(id);
             await _taskItemRepository.SaveAsync();
 
 
-        }
-
-        private bool TaskItemExists(int id)
-        {
-            return _taskItemRepository.GetTaskItemByIDAsync(id) != null;
         }
 
 

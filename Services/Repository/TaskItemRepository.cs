@@ -23,7 +23,11 @@ namespace SimpleAPI.Services.Repository
 
         public async Task<TaskItem> GetTaskItemByIDAsync(int taskitemId)
         {
-            return await _context.TaskItems.Include(t => t.Assignee).FirstOrDefaultAsync(t => t.Id == taskitemId);
+            TaskItem? taskItem = await _context.TaskItems.Include(t => t.Assignee).FirstOrDefaultAsync(t => t.Id == taskitemId);
+            if(taskItem == null) {
+                throw new KeyNotFoundException("Task Item not found.");
+            }
+            return taskItem;
         }
 
         public async Task<IEnumerable<TaskItem>> GetTaskItemsAsync()
